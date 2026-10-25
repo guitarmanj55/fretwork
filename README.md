@@ -18,7 +18,7 @@ For your phone or tablet on a music stand, host the folder anywhere with https (
 - **Tune**: microphone tuner (YIN pitch detection, ±5¢ = in tune). Seven tunings, adjustable A4, tap a string for a reference tone. Auto-detects which string you're on, or locks to one.
 - **Play → Backing tracks**: 15 progressions (barre workouts, 12-bar blues, slash-chord descent, fingerpicking, waltzes…) with synthesised guitar, bass and drums. Tempo 40–200 with 70% / 85% slow-down chips, count-in, bar looping, capo, transpose, six rhythm feels. Mute the guitar part so you play it. Write your own with a chord chart like `| Am | C G | F |`.
 - **Play → My audio file**: load your own MP3/M4A/WAV, slow down 40–125% without changing pitch, A–B loop, ±10 s skip, and a ±100¢ fine-tune so a recording can be matched to your guitar.
-- **Learn**: chord library with diagrams (open, barre, 7ths, sus/add, slash) and a look-up for any chord; scale explorer with a 15-fret fretboard, five position boxes and playback; strumming patterns you can load straight into Play; grade-5 skills checklist.
+- **Learn**: chord library with diagrams (open, barre, 7ths, sus/add, slash) and a look-up for any chord; scale explorer with a 15-fret fretboard, position boxes (all five for pentatonics) and playback; strumming patterns you can load straight into Play; grade-5 skills checklist.
 - **Practice**: metronome with tap tempo, chord-change trainer with a 60-second challenge and personal bests, automatic practice log with daily goal and streak.
 
 Everything is stored locally in the browser (`localStorage`). Nothing is uploaded.
@@ -26,7 +26,8 @@ Everything is stored locally in the browser (`localStorage`). Nothing is uploade
 ## Notes
 
 - Because you're playing an acoustic out loud, the tuner turns off echo cancellation and noise suppression, and it stops listening when you leave the Tune tab. Don't run backing tracks while the tuner is on.
-- iPhone: if you hear nothing, flip the ringer switch to ring (Web Audio follows it).
+- iPhone: on iOS 17 and later the app asks to play even with the ringer switch on silent. On older iOS, flip the switch to ring if you hear nothing.
+- After an update the app reloads itself once when the new version has downloaded (not while something is playing or the tuner is on).
 - Streaming-service songs can't be played inside a web app; use the audio-file player with your own files.
 
 ## Tests

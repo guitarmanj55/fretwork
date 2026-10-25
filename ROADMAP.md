@@ -3,13 +3,13 @@
 Ordered. Don't start a phase until the previous one is genuinely done.
 
 ## Phase 0: Verify what exists (do this first)
-- [ ] Serve locally, open in a browser, click through every tab and sub-tab; fix anything broken or ugly. Check at 390px and at tablet width.
+- [x] Serve locally, open in a browser, click through every tab and sub-tab; fix anything broken or ugly. Check at 390px and at tablet width. (Done 25 Oct 2026 at 390px and 1024px.)
 - [ ] Tuner on a real acoustic: all six strings, in standard and one alternate tuning. Fix flicker, octave errors, slow response. Confirm the "in tune ✓" and per-string tick behave.
 - [ ] Backing tracks by ear: every built-in song and every feel. Fix levels, timing, count-in, bar looping, capo and key change.
 - [ ] Audio-file player with a real MP3: seek, A-B loop, speed chips, fine-tune slider.
 - [ ] Test on the phone/tablet he actually plays with (install as PWA, check wake lock, mic, iOS ringer behaviour).
 - [ ] Make sure offline works after first load and that updates ship (service worker cache bump).
-- [ ] `git init`, first commit.
+- [x] `git init`, first commit.
 
 ## Phase 1: Make it nicer to practise with
 - Bigger "NOW" chord display option for use at arm's length; landscape layout for a tablet on a stand.

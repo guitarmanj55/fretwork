@@ -95,10 +95,10 @@
         <span class="bpm" id="bpmVal">100</span>
       </div>
       <div class="row gap wrap mt" id="bpmChips"></div>
-      <div class="row gap wrap mt">
-        <label class="small grow">Feel <select id="feelSel"></select></label>
+      <div class="grid3 mt">
+        <label class="small">Feel <select id="feelSel"></select></label>
         <label class="small">Capo <select id="capoSel"></select></label>
-        <label class="small">Key <select id="transSel"></select></label>
+        <label class="small">Key shift <select id="transSel"></select></label>
       </div>
       <div class="row gap wrap mt">
         <label class="chk"><input type="checkbox" id="countInChk"> Count-in</label>
@@ -120,9 +120,9 @@
       <input type="range" id="afSeek" min="0" max="1000" value="0" class="full mt" disabled>
       <div class="row between small muted"><span id="afCur">0:00</span><span id="afDur">0:00</span></div>
       <div class="row center gap mt">
-        <button class="btn sq" id="afBack">−10s</button>
+        <button class="btn sq" id="afBack" disabled>−10s</button>
         <button class="btn primary big" id="afPlay" disabled>▶ Play</button>
-        <button class="btn sq" id="afFwd">+10s</button>
+        <button class="btn sq" id="afFwd" disabled>+10s</button>
       </div>
     </div>
     <div class="card">
@@ -229,12 +229,12 @@
       <button class="btn primary grow" id="trPlay">▶ Start</button>
     </div>
     <div class="now mt">
-      <div class="nowbox"><div class="label">NOW</div><div class="chordname sm" id="trNowName">–</div><div id="trNowDiag" class="diag"></div></div>
-      <div class="nextbox"><div class="label">NEXT</div><div class="chordname sm" id="trNextName">–</div><div id="trNextDiag" class="diag"></div></div>
+      <div class="nowbox"><div class="label">NOW</div><div class="chordname sm empty" id="trNowName">–</div><div id="trNowDiag" class="diag"></div></div>
+      <div class="nextbox"><div class="label">NEXT</div><div class="chordname sm empty" id="trNextName">–</div><div id="trNextDiag" class="diag"></div></div>
     </div>
     <div class="dots" id="trDots"></div>
     <hr>
-    <div class="label">60-SECOND CHALLENGE <span class="muted small">(first two chips)</span></div>
+    <div class="label">60-SECOND CHALLENGE <span class="muted small" id="chPair"></span></div>
     <div class="row gap">
       <button class="btn primary" id="chStart">Start</button>
       <button class="btn big grow" id="chTap" disabled>Clean change ✓</button>
@@ -257,14 +257,14 @@
   <form method="dialog" id="songForm" class="dlg">
     <h3 id="dlgTitle">Song</h3>
     <label class="small">Name<input type="text" id="dName" required maxlength="60"></label>
-    <div class="row gap">
-      <label class="small grow">BPM<input type="number" id="dBpm" min="40" max="200" value="90"></label>
-      <label class="small grow">Time<select id="dTs"><option>4/4</option><option>3/4</option></select></label>
-      <label class="small grow">Feel<select id="dFeel"></select></label>
+    <div class="grid3">
+      <label class="small">BPM<input type="number" id="dBpm" min="40" max="200" value="90"></label>
+      <label class="small">Time<select id="dTs"><option>4/4</option><option>3/4</option></select></label>
+      <label class="small">Feel<select id="dFeel"></select></label>
     </div>
-    <label class="small">Chords, one bar per section. Put two chords in a bar to split it, and use <code>|</code> or new lines between bars. <code>%</code> repeats the last bar, <code>N.C</code> is a rest.
-      <textarea id="dChart" rows="6" spellcheck="false" placeholder="| Am | C G | F | E |"></textarea>
-    </label>
+    <label class="small" for="dChart">Chords</label>
+    <p class="hint">Use <code>|</code> or new lines between bars. Put two chords in a bar to split it. <code>%</code> repeats the last bar, <code>N.C</code> is a rest.</p>
+    <textarea id="dChart" rows="6" spellcheck="false" placeholder="| Am | C G | F | E |"></textarea>
     <div class="err" id="dErr"></div>
     <div class="row gap between">
       <button type="button" class="btn danger" id="dDelete">Delete</button>

@@ -129,8 +129,8 @@ function chordSVG(frets) {
   for (let i = 0; i < 6; i++) s += '<line x1="' + (L + i * sx) + '" x2="' + (L + i * sx) + '" y1="' + T + '" y2="' + (T + gh) + '"/>';
   frets.forEach((f, i) => {
     const x = L + i * sx;
-    if (f === -1) s += '<text class="x" x="' + x + '" y="' + (T - 8) + '">×</text>';
-    else if (f === 0) s += '<circle class="mk" cx="' + x + '" cy="' + (T - 10) + '" r="3.4"/>';
+    if (f === -1) s += '<text class="x" x="' + x + '" y="' + (T - 6.5) + '">×</text>';
+    else if (f === 0) s += '<circle class="mk" cx="' + x + '" cy="' + (T - 11) + '" r="3.6"/>';
   });
   let i0 = -1, i1 = -1, barre = false;
   if (pos.length) {
@@ -321,11 +321,16 @@ function renderStrings() {
   }
   $('autoBtn').classList.toggle('on', T.lock == null);
 }
+// iOS 17+: 'playback' lets Web Audio sound with the ringer switch on silent; the mic needs 'play-and-record'.
+function audioSession(type) { try { if (navigator.audioSession) navigator.audioSession.type = type; } catch (e) { /* not supported */ } }
+audioSession('playback');
 async function tunerStart() {
   ensureAudio();
+  audioSession('play-and-record');
   try {
     T.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
   } catch (e) {
+    audioSession('playback');
     $('tVerdict').className = 'verdict off';
     $('tVerdict').textContent = 'Microphone blocked';
     $('tHint').textContent = location.protocol === 'file:' || (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1')
@@ -347,11 +352,12 @@ function tunerStop() {
   if (T.stream) T.stream.getTracks().forEach((t) => t.stop());
   try { if (T.src) T.src.disconnect(); } catch (e) { /* ignore */ }
   T.stream = null; T.src = null; T.analyser = null;
+  audioSession('playback');
   const b = $('tunerBtn'); if (b) b.textContent = 'Start tuner';
   tunerIdle();
 }
 function tunerIdle() {
-  $('tNote').textContent = '–'; $('tOct').textContent = ''; $('tHz').innerHTML = '&nbsp;';
+  $('tNote').textContent = '–'; $('tNote').classList.add('empty'); $('tOct').textContent = ''; $('tHz').innerHTML = '&nbsp;';
   $('needle').style.left = '50%'; $('needle').className = 'needle';
   const v = $('tVerdict'); v.className = 'verdict idle'; v.textContent = T.running ? 'Pluck a string' : 'Tuner is off';
   $$('.str').forEach((b) => b.classList.remove('target'));
@@ -372,7 +378,7 @@ function tunerLoop(ts) {
     const idx = T.lock != null ? T.lock : C.nearestString(med, tm).idx;
     const cents = (med - tm[idx]) * 100, ab = Math.abs(cents);
     const nm = Math.round(med);
-    $('tNote').textContent = C.noteName(nm); $('tOct').textContent = C.noteOct(nm);
+    $('tNote').textContent = C.noteName(nm); $('tNote').classList.remove('empty'); $('tOct').textContent = C.noteOct(nm);
     $('tHz').textContent = (C.midiToFreq(med)).toFixed(1) + ' Hz · target ' + C.noteLabel(tm[idx]) + ' (string ' + (6 - idx) + ')';
     const cls = ab <= 5 ? 'ok' : ab <= 15 ? 'near' : 'off';
     const nd = $('needle'); nd.style.left = (50 + clamp(cents, -50, 50)) + '%'; nd.className = 'needle ' + cls;
@@ -459,6 +465,7 @@ function renderChart() {
 }
 function showChord(nameEl, diagEl, name) {
   nameEl.textContent = name || '–';
+  nameEl.classList.toggle('empty', !name);
   const sh = name && !C.isRest(name) ? C.chordShape(name) : null;
   diagEl.innerHTML = sh ? chordSVG(sh.frets) : '';
 }
@@ -520,7 +527,7 @@ function buildPlayUI() {
   $('capoSel').innerHTML = [0, 1, 2, 3, 4, 5, 6, 7].map((n) => '<option value="' + n + '">' + (n ? 'Capo ' + n : 'No capo') + '</option>').join('');
   $('capoSel').value = String(S.capo);
   $('capoSel').onchange = () => { S.capo = playCfg.capo = Number($('capoSel').value); saveS(); warmLater(playCfg); capoText($('nowName').textContent); };
-  let to = ''; for (let i = -6; i <= 6; i++) to += '<option value="' + i + '">' + (i === 0 ? 'Original key' : (i > 0 ? '+' : '') + i + ' semitones') + '</option>';
+  let to = ''; for (let i = -6; i <= 6; i++) to += '<option value="' + i + '">' + (i === 0 ? 'Original' : (i > 0 ? '+' : '') + i) + '</option>';
   $('transSel').innerHTML = to; $('transSel').value = '0';
   $('transSel').onchange = () => { playCfg.transpose = Number($('transSel').value); P.lastChord = null; renderChart(); resetNow(); warmLater(playCfg); };
   $('countInChk').checked = S.countIn; $('countInChk').onchange = () => { S.countIn = playCfg.countIn = $('countInChk').checked; saveS(); };
@@ -586,6 +593,7 @@ function afRate() {
   else { afPitchMode(true); AF.el.playbackRate = sp; $('afSpeed').disabled = false; }
   $('afSpeedVal').textContent = cents !== 0 ? '100% (fine-tuning)' : Math.round(sp * 100) + '%';
   $('afPitchVal').textContent = (cents > 0 ? '+' : '') + cents + '¢';
+  $$('#afSpeedChips .chip').forEach((b) => b.classList.toggle('on', cents === 0 && Number(b.dataset.v) === Math.round(sp * 100)));
 }
 function afLoopText() { $('afLoopTxt').textContent = AF.a == null && AF.b == null ? 'no loop' : (AF.a != null ? fmtTime(AF.a) : '–') + ' → ' + (AF.b != null ? fmtTime(AF.b) : '–'); }
 function afFrame() {
@@ -600,7 +608,7 @@ function buildAudioUI() {
     const f = $('afFile').files[0]; if (!f) return;
     if (AF.url) URL.revokeObjectURL(AF.url);
     AF.url = URL.createObjectURL(f); AF.el.src = AF.url; AF.a = AF.b = null; afLoopText();
-    $('afName').textContent = f.name; $('afPlay').disabled = false; $('afSeek').disabled = false;
+    $('afName').textContent = f.name; ['afPlay', 'afSeek', 'afBack', 'afFwd'].forEach((id) => { $(id).disabled = false; });
     SEQS.forEach((s) => s.stop());
     afRate();
   };
@@ -683,6 +691,8 @@ function renderScale() {
   const notes = C.scaleNotes(SC.root, sc.iv, tm, 15), positions = C.scalePositions(SC.root, sc.iv, tm);
   const win = SC.pos >= 0 && positions[SC.pos] ? positions[SC.pos] : null;
   $('fretboard').innerHTML = fretboardSVG(notes, names, $('scDeg').checked, win);
+  const wrap = $('fretboard').parentNode; // on a phone the board scrolls sideways, so bring the chosen box into view
+  if (wrap && win) wrap.scrollLeft = Math.max(0, (38 + (win.lo - 1.5) * (714 / 15)) / 760 * wrap.scrollWidth);
   $('scPos').innerHTML = '<button class="chip' + (!win ? ' on' : '') + '" data-p="-1">Whole neck</button>' + positions.map((p, i) => '<button class="chip' + (SC.pos === i ? ' on' : '') + '" data-p="' + i + '">Pos ' + (i + 1) + ' · fr ' + p.lo + '–' + p.hi + '</button>').join('');
   $$('#scPos .chip').forEach((b) => { b.onclick = () => { scaleStop(); SC.pos = Number(b.dataset.p); renderScale(); }; });
   $$('#fretboard .fn').forEach((g) => { g.onclick = () => { ensureAudio(); playBuf(pluckBuf(C.midiToFreq(Number(g.dataset.m)), 'gtr'), ctx.currentTime + 0.02, 0.7, bus.gtr); }; });
@@ -789,6 +799,7 @@ function renderTrChips() {
   $$('#trChips .chip').forEach((b) => {
     b.onclick = () => { const c = b.dataset.c, i = TR.chips.indexOf(c); if (i >= 0) TR.chips.splice(i, 1); else TR.chips.push(c); store.set('trChips', TR.chips); renderTrChips(); if (trSeq.playing) trSeq.stop(); };
   });
+  $('chPair').textContent = TR.chips.length >= 2 ? '(' + TR.chips[0] + ' ⇄ ' + TR.chips[1] + ', your first two picks)' : '(pick two chords above)';
 }
 function buildTrainerUI() {
   renderTrChips();
@@ -841,7 +852,7 @@ function renderLog() {
   const days = [];
   for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push({ key: d.toLocaleDateString('en-CA'), name: d.toLocaleDateString('en-GB', { weekday: 'short' }) }); }
   const maxV = Math.max(goal, ...days.map((d) => logData[d.key] || 0));
-  $('logWeek').innerHTML = days.map((d) => { const v = logData[d.key] || 0; return '<div><i class="' + (v >= goal ? 'goal' : '') + '" style="height:' + Math.round(v / maxV * 60) + 'px"></i>' + d.name + '<br>' + Math.floor(v / 60) + 'm</div>'; }).join('');
+  $('logWeek').innerHTML = days.map((d) => { const v = logData[d.key] || 0; return '<div><i class="' + (v >= goal ? 'goal' : v < 60 ? 'none' : '') + '" style="height:' + Math.round(v / maxV * 60) + 'px"></i>' + d.name + '<br>' + Math.floor(v / 60) + 'm</div>'; }).join('');
   let streak = 0; const d = new Date();
   if (!(logData[k] >= 60)) d.setDate(d.getDate() - 1);
   while ((logData[d.toLocaleDateString('en-CA')] || 0) >= 60) { streak++; d.setDate(d.getDate() - 1); }
@@ -874,6 +885,11 @@ try { ensureAudio(); } catch (e) { console.warn('Web Audio unavailable', e); }
 buildNav(); buildTunerUI(); buildPlayUI(); buildAudioUI(); buildChordsUI(); buildScalesUI(); buildStrumUI(); buildSkillsUI(); buildMetroUI(); buildTrainerUI(); buildLogUI();
 showTab(['tune', 'play', 'learn', 'practice'].indexOf(S.tab) >= 0 ? S.tab : 'tune');
 tunerIdle();
-if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is optional */ });
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  // a new version takes over in the background; reload once so it shows now instead of on the next launch
+  const hadSW = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadSW && !isActive() && !T.running) location.reload(); });
+  navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is optional */ });
+}
 window.__fretwork = { C, playSeq, S }; // handy for debugging in the console
 })();

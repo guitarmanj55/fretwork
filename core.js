@@ -203,8 +203,22 @@
   function scalePositions(root, iv, tuning) {
     const t = tuning || STD, base = (((root - t[0]) % 12) + 12) % 12, five = iv.length <= 6, out = [];
     iv.forEach(i => {
-      const f = base + i;
-      if (f > 13) return;
+      let f = base + i;
+      if (f > 12) f -= 12; // keep every box on the 15-fret board instead of dropping the highest
+      if (iv.length === 5) {
+        // pentatonic box: two notes per string, walking up from this degree on the low E
+        let p = t[0] + f, lo = 99, hi = 0;
+        for (let s = 0; s < 6; s++) {
+          let got = 0;
+          for (let fr = 0; fr <= 17 && got < 2; fr++) {
+            const m = t[s] + fr;
+            if (m < p || iv.indexOf((((m - root) % 12) + 12) % 12) < 0) continue;
+            lo = Math.min(lo, fr); hi = Math.max(hi, fr); p = m + 1; got++;
+          }
+        }
+        out.push({ lo: lo, hi: hi });
+        return;
+      }
       const lo = five ? f : Math.max(0, f - 1);
       out.push({ lo: lo, hi: lo + (five ? 3 : 4) });
     });

@@ -23,7 +23,10 @@ textarea{width:100%;font-family:ui-monospace,Menlo,monospace;margin-top:6px}
 label.small{display:flex;flex-direction:column;gap:4px;color:var(--muted)}
 label.small.row,.row label.small{flex-direction:row;align-items:center}
 dialog label.small{margin-top:10px}
-.btn{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit;font-weight:600;min-height:44px;cursor:pointer}
+.btn{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit;font-weight:600;min-height:44px;cursor:pointer;white-space:nowrap}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.grid3 select,.grid3 input{width:100%;min-width:0}
+.empty{color:var(--muted);opacity:.45}
 .btn:active{transform:scale(.98)}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn.big{min-height:54px;padding:12px 26px;font-size:18px}
@@ -71,7 +74,7 @@ dialog label.small{margin-top:10px}
 .cd line{stroke:var(--muted);stroke-width:1}
 .cd .nut{fill:var(--ink)}
 .cd .dot{fill:var(--accent)}.cd .barre{fill:var(--accent)}
-.cd .mk{fill:none;stroke:var(--ink);stroke-width:1.3}.cd .x{fill:var(--muted);font-size:10px;text-anchor:middle}
+.cd .mk{fill:none;stroke:var(--ink);stroke-width:1.3}.cd .x{fill:var(--ink);font-size:15px;font-weight:700;text-anchor:middle}
 .cd .fr{fill:var(--ink);font-size:11px;font-weight:700}
 .dots{display:flex;gap:8px;justify-content:center;margin:10px 0}
 .dots span{width:16px;height:16px;border-radius:50%;background:var(--panel2);border:1px solid var(--line)}
@@ -88,7 +91,7 @@ dialog label.small{margin-top:10px}
 .cc{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px;text-align:center;color:var(--ink);font:inherit}
 .cc b{display:block;font-size:17px}.cc svg{width:100%;max-width:92px}
 .fretwrap{overflow-x:auto;margin-top:12px;border-radius:10px}
-#fretboard{min-width:620px}
+#fretboard{min-width:760px}
 .fb .string{stroke:#a8998a;stroke-width:1.2}.fb .fret{stroke:var(--line);stroke-width:2}.fb .nutl{stroke:var(--ink);stroke-width:4}
 .fb .inlay{fill:var(--line)}.fb .fn text{fill:var(--accent-ink);font-size:10px;font-weight:700;text-anchor:middle;pointer-events:none}
 .fb .fn circle{fill:var(--accent);cursor:pointer}.fb .fn.root circle{fill:#fff}.fb .fn.dim{opacity:.18}.fb .fn.hl circle{fill:var(--ok)}
@@ -107,6 +110,7 @@ dialog label.small{margin-top:10px}
 .week{display:flex;gap:8px;align-items:flex-end;height:80px;margin:8px 0}
 .week div{flex:1;text-align:center;font-size:11px;color:var(--muted);display:flex;flex-direction:column;justify-content:flex-end;height:100%}
 .week i{display:block;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px;margin-bottom:4px}
+.week i.none{background:var(--line)}
 .week i.goal{background:var(--ok)}
 
 /* dialog + nav */
@@ -120,4 +124,4 @@ code{background:var(--panel2);padding:1px 5px;border-radius:5px}
 .tabbar button{flex:1;background:none;border:0;color:var(--muted);padding:10px 0 8px;font:inherit;font-size:12px;font-weight:600}
 .tabbar button i{display:block;font-style:normal;font-size:20px;line-height:1.2}
 .tabbar button.active{color:var(--accent)}
-@media (min-width:700px){.chordname{font-size:60px}}
+@media (min-width:700px){.chordname{font-size:60px}#fretboard{min-width:0}}
