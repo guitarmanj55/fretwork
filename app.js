@@ -412,9 +412,15 @@ const BUILTIN = [
   { id: 'b-waltz', name: 'Waltz in G (G Em C D)', bpm: 108, ts: '3/4', feel: 'waltz', level: 'Easy', bars: [['G'], ['Em'], ['C'], ['D']] },
   { id: 'b-waltzm', name: 'Minor waltz (Am Dm E Am)', bpm: 96, ts: '3/4', feel: 'waltz', level: 'Easy', bars: [['Am'], ['Dm'], ['E'], ['Am']] }
 ];
+// traditional songs from songs.js: sections flattened into bars, with the bar each section starts on
+const SONGS = (window.SONGS || []).map((s) => {
+  const bars = [], sections = [];
+  s.sections.forEach((sec) => { sections.push({ name: sec[0], start: bars.length }); C.parseChart(sec[1]).bars.forEach((b) => bars.push(b)); });
+  return { id: s.id, name: s.name, origin: s.origin, key: s.key, tip: s.tip, bpm: s.bpm, ts: s.ts, feel: s.feel, level: s.level, bars: bars, sections: sections };
+});
 let custom = store.get('songs', []);
 let tmpSong = null;
-const allSongs = () => BUILTIN.concat(custom).concat(tmpSong ? [tmpSong] : []);
+const allSongs = () => BUILTIN.concat(SONGS).concat(custom).concat(tmpSong ? [tmpSong] : []);
 const findSong = (id) => allSongs().find((s) => s.id === id) || BUILTIN[0];
 const P = { song: null, bpm: 100, lastChord: null };
 const playCfg = {
@@ -430,6 +436,7 @@ function feelOptions(sel, ts, cur) {
 function renderSongSelect() {
   const opt = (s) => '<option value="' + esc(s.id) + '">' + esc(s.name) + '</option>';
   let h = '<optgroup label="Backing tracks">' + BUILTIN.map(opt).join('') + '</optgroup>';
+  if (SONGS.length) h += '<optgroup label="Songs">' + SONGS.map(opt).join('') + '</optgroup>';
   if (custom.length) h += '<optgroup label="My songs">' + custom.map(opt).join('') + '</optgroup>';
   if (tmpSong) h += '<optgroup label="Practice pattern">' + opt(tmpSong) + '</optgroup>';
   $('songSel').innerHTML = h;
@@ -452,13 +459,15 @@ function loadSong(id) {
 }
 function renderMeta() {
   const s = P.song;
-  $('songMeta').textContent = (s.level ? s.level + ' · ' : '') + s.ts + ' · ' + s.bars.length + ' bars' + (custom.some((c) => c.id === s.id) ? ' · your song' : '');
+  $('songMeta').textContent = (s.origin ? s.origin + ' · key of ' + s.key + ' · ' : '') + (s.level ? s.level + ' · ' : '') + s.ts + ' · ' + s.bars.length + ' bars' + (custom.some((c) => c.id === s.id) ? ' · your song' : '');
+  $('songTip').textContent = s.tip || '';
 }
 function renderBpm() { $('bpmRange').value = P.bpm; $('bpmVal').textContent = P.bpm; }
 function setBpm(v) { P.bpm = clamp(Math.round(v), 40, 200); renderBpm(); }
 function renderChart() {
-  const lp = playCfg.loop;
+  const lp = playCfg.loop, secs = (P.song && P.song.sections) || [];
   $('chart').innerHTML = playCfg.bars.map((bar, i) =>
+    secs.filter((s) => s.start === i).map((s) => '<div class="sec">' + esc(s.name) + '</div>').join('') +
     '<button class="bar' + (lp.on && i >= lp.start && i <= lp.end ? ' inloop' : '') + '" data-bar="' + i + '"><span class="n">' + (i + 1) + '</span>' +
     bar.map((c) => '<b>' + esc(C.transposeChord(c, playCfg.transpose)) + '</b>').join('') + '</button>').join('');
   $$('#chart .bar').forEach((b) => { b.onclick = () => playSeq.jumpTo(Number(b.dataset.bar)); });
@@ -580,6 +589,23 @@ function saveSongDialog() {
   if (i >= 0) custom[i] = song; else custom.push(song);
   store.set('songs', custom);
   $('songDlg').close(); P.song = null; renderSongSelect(); loadSong(id);
+}
+
+function buildSongsUI() {
+  const levels = ['Beginner', 'Easy', 'Intermediate'];
+  $('songList').innerHTML = levels.map((lv) => {
+    const list = SONGS.filter((s) => s.level === lv);
+    if (!list.length) return '';
+    return '<div class="label mt">' + lv.toUpperCase() + '</div>' + list.map((s) => {
+      const chords = Array.from(new Set(s.bars.reduce((a, b) => a.concat(b), []).filter((c) => !C.isRest(c))));
+      return '<div class="song"><div class="grow"><b>' + esc(s.name) + '</b><div class="small muted">' + esc(s.origin) + ' · key of ' + esc(s.key) + ' · ' + s.ts + ' · ' + s.bpm + ' bpm</div>' +
+        '<div class="chips mt">' + chords.map((c) => '<span class="chip sm">' + esc(c) + '</span>').join('') + '</div></div>' +
+        '<button class="btn primary" data-song="' + esc(s.id) + '">Play along</button></div>';
+    }).join('');
+  }).join('');
+  $$('#songList [data-song]').forEach((b) => {
+    b.onclick = () => { loadSong(b.dataset.song); showSub('play', 'backing'); if (window.scrollTo) window.scrollTo(0, 0); };
+  });
 }
 
 /* ------------------------------------------------------------------ AUDIO FILE PLAYER */
@@ -853,12 +879,29 @@ function renderLog() {
   for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push({ key: d.toLocaleDateString('en-CA'), name: d.toLocaleDateString('en-GB', { weekday: 'short' }) }); }
   const maxV = Math.max(goal, ...days.map((d) => logData[d.key] || 0));
   $('logWeek').innerHTML = days.map((d) => { const v = logData[d.key] || 0; return '<div><i class="' + (v >= goal ? 'goal' : v < 60 ? 'none' : '') + '" style="height:' + Math.round(v / maxV * 60) + 'px"></i>' + d.name + '<br>' + Math.floor(v / 60) + 'm</div>'; }).join('');
-  let streak = 0; const d = new Date();
-  if (!(logData[k] >= 60)) d.setDate(d.getDate() - 1);
-  while ((logData[d.toLocaleDateString('en-CA')] || 0) >= 60) { streak++; d.setDate(d.getDate() - 1); }
+  const streak = streakDays();
   $('logStreak').textContent = streak ? streak + '-day streak (a day counts after 1 minute of playing)' : 'Play for a minute to start a streak.';
 }
+function streakDays() {
+  let streak = 0; const d = new Date();
+  if (!(logData[todayKey()] >= 60)) d.setDate(d.getDate() - 1);
+  while ((logData[d.toLocaleDateString('en-CA')] || 0) >= 60) { streak++; d.setDate(d.getDate() - 1); }
+  return streak;
+}
 function buildLogUI() { $('logGoal').onchange = () => { store.set('goal', clamp(Number($('logGoal').value) || 20, 5, 240)); renderLog(); }; renderLog(); }
+
+/* ------------------------------------------------------------------ home */
+function renderHome() {
+  const goal = store.get('goal', 20), today = Math.floor((logData[todayKey()] || 0) / 60), streak = streakDays();
+  $('homeToday').textContent = 'Today: ' + today + ' of ' + goal + ' min' + (streak ? ' · ' + streak + '-day streak' : '');
+  $('homeBar').style.width = clamp(today / goal * 100, 0, 100) + '%';
+  $('homeCarry').textContent = '▶ Carry on with ' + (P.song ? P.song.name : 'the player');
+}
+function buildHomeUI() {
+  $$('[data-go]').forEach((b) => { b.onclick = () => { showTab(b.dataset.go); if (b.dataset.sub) showSub(b.dataset.go, b.dataset.sub); }; });
+  $('homeCarry').onclick = () => { showTab('play'); showSub('play', 'backing'); };
+  $$('.logo').forEach((el) => { el.onclick = () => showTab('home'); });
+}
 
 /* ------------------------------------------------------------------ navigation */
 function showTab(name) {
@@ -867,10 +910,12 @@ function showTab(name) {
   $$('.tabbar button').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
   S.tab = name; saveS();
   if (name === 'practice') renderLog();
-  $('topSub').textContent = { tune: 'tuner', play: 'play along', learn: 'learn', practice: 'practice' }[name];
+  if (name === 'home') renderHome();
+  $('topSub').textContent = { home: '', tune: 'tuner', play: 'play along', learn: 'lessons', practice: 'practice' }[name];
+  if (window.scrollTo) window.scrollTo(0, 0);
 }
 function showSub(group, sub) {
-  const subs = group === 'play' ? ['backing', 'audio'] : ['chords', 'scales', 'strum', 'skills'];
+  const subs = group === 'play' ? ['backing', 'songs', 'audio'] : ['chords', 'scales', 'strum', 'skills'];
   subs.forEach((s) => { $(group + '-' + s).hidden = s !== sub; });
   $$('#' + group + 'Seg button').forEach((b) => b.classList.toggle('on', b.dataset.sub === sub));
 }
@@ -882,8 +927,8 @@ function buildNav() {
 
 /* ------------------------------------------------------------------ boot */
 try { ensureAudio(); } catch (e) { console.warn('Web Audio unavailable', e); }
-buildNav(); buildTunerUI(); buildPlayUI(); buildAudioUI(); buildChordsUI(); buildScalesUI(); buildStrumUI(); buildSkillsUI(); buildMetroUI(); buildTrainerUI(); buildLogUI();
-showTab(['tune', 'play', 'learn', 'practice'].indexOf(S.tab) >= 0 ? S.tab : 'tune');
+buildNav(); buildTunerUI(); buildPlayUI(); buildSongsUI(); buildAudioUI(); buildChordsUI(); buildScalesUI(); buildStrumUI(); buildSkillsUI(); buildMetroUI(); buildTrainerUI(); buildLogUI(); buildHomeUI();
+showTab('home'); // every launch opens on the home screen
 tunerIdle();
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   // a new version takes over in the background; reload once so it shows now instead of on the next launch

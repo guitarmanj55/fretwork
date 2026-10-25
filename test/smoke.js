@@ -60,6 +60,7 @@ function advance(ms) {
   nowMs = end;
 }
 vm.runInContext(fs.readFileSync(path.join(root, 'core.js'), 'utf8'), sandbox, { filename: 'core.js' });
+vm.runInContext(fs.readFileSync(path.join(root, 'songs.js'), 'utf8'), sandbox, { filename: 'songs.js' });
 vm.runInContext(fs.readFileSync(path.join(root, 'app.js'), 'utf8'), sandbox, { filename: 'app.js' });
 const fw = sandbox.__fretwork;
 let fail = 0;
@@ -84,7 +85,7 @@ ok(events.length === n, 'stop halts events');
 // every built-in song schedules without error, in every feel of matching time signature
 const errsBefore = log.errors.length;
 const sandboxSongs = vm.runInContext('(' + (() => 0).toString() + ')', sandbox);
-['b-canon', 'b-barre', 'b-bass', 'b-blueA', 'b-pick', 'b-jazz', 'b-waltz', 'b-waltzm', 'b-bm', 'b-mblues'].forEach((id) => {
+['b-canon', 'b-barre', 'b-bass', 'b-blueA', 'b-pick', 'b-jazz', 'b-waltz', 'b-waltzm', 'b-bm', 'b-mblues'].concat(sandbox.SONGS.map((s) => s.id)).forEach((id) => {
   // loadSong is internal, so drive via the select handler
   els.songSel.value = id; els.songSel.onchange();
   fw.playSeq.start(); advance(15000); fw.playSeq.stop();

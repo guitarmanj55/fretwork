@@ -11,7 +11,8 @@ First version was written in a Claude chat session and **has never been run in a
 ## Stack and rules
 - Vanilla JS, HTML, CSS. **No build step, no dependencies, no frameworks.** Keep it that way unless there is a strong reason.
 - `core.js`: pure logic, no DOM or Web Audio (chord voicings, chart parser, YIN pitch detector, scales, plucked-string synth, rhythm `FEELS`). Works in the browser (`window.Core`) and Node. Anything testable belongs here.
-- `app.js`: UI, Web Audio engine, `Sequencer` class (look-ahead scheduler used by backing tracks, metronome and chord trainer), tuner, audio-file player.
+- `songs.js`: the song library (`window.SONGS`), traditional/public-domain only, chords by section, no lyrics. `core.test.js` checks every chart parses.
+- `app.js`: UI (Home screen, Tune, Play, Lessons, Practice), Web Audio engine, `Sequencer` class (look-ahead scheduler used by backing tracks, metronome and chord trainer), tuner, audio-file player.
 - `sw.js`: cache-first service worker. **Bump `CACHE` in `sw.js` every time any file changes**, or the installed app keeps serving stale files.
 - All data lives in `localStorage` under the `fw.` prefix (settings, custom songs, practice log, skills, best scores). Nothing leaves the device.
 - British English in UI copy.

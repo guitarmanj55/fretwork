@@ -73,5 +73,17 @@ Object.entries(C.FEELS).forEach(([k, f]) => {
   ok([f.gtr, f.bass, f.kick, f.snare, f.hat].every(p => p.length === n), 'feel ' + k + ' pattern lengths = ' + n);
 });
 
+// song library: every chart parses, every chord has a shape, feel matches the time signature
+const SONGS = require('../songs.js');
+const ids = new Set();
+SONGS.forEach(s => {
+  ok(!ids.has(s.id), s.id + ' id is unique'); ids.add(s.id);
+  ok(C.FEELS[s.feel] && C.FEELS[s.feel].ts === s.ts, s.id + ' feel ' + s.feel + ' fits ' + s.ts);
+  s.sections.forEach(sec => {
+    const p = C.parseChart(sec[1]);
+    ok(p.bars.length >= 4 && !p.bad.length, s.id + ' ' + sec[0] + ': ' + p.bars.length + ' bars' + (p.bad.length ? ', bad ' + p.bad.join(' ') : ''));
+  });
+});
+
 console.log(fail ? fail + ' FAILED' : 'ALL PASSED');
 process.exit(fail ? 1 : 0);

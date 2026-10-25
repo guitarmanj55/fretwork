@@ -16,6 +16,25 @@
 <header class="top"><span class="logo">Fretwork</span><span class="sub" id="topSub"></span></header>
 
 <main>
+<!-- ================= HOME ================= -->
+<section id="tab-home" class="tab">
+  <div class="hero">
+    <h1>Ready to play?</h1>
+    <div class="small muted" id="homeToday"></div>
+    <div class="progress"><div id="homeBar"></div></div>
+  </div>
+  <div class="tiles">
+    <button class="tile" data-go="tune"><i>♪</i><span><b>Tuner</b><small>Tune by microphone in seven tunings</small></span></button>
+    <button class="tile" data-go="play"><i>▶</i><span><b>Play along</b><small>Backing tracks, songs and your own recordings</small></span></button>
+    <button class="tile" data-go="learn"><i>♬</i><span><b>Lessons</b><small>Chords, scales, strumming and grade-5 skills</small></span></button>
+  </div>
+  <div class="row gap mt">
+    <button class="btn grow" data-go="play" data-sub="songs">Songs</button>
+    <button class="btn grow" data-go="practice">Practice tools</button>
+  </div>
+  <button class="btn full mt carry" id="homeCarry"></button>
+</section>
+
 <!-- ================= TUNE ================= -->
 <section id="tab-tune" class="tab">
   <div class="card tuner">
@@ -44,8 +63,16 @@
 <!-- ================= PLAY ================= -->
 <section id="tab-play" class="tab">
   <div class="seg" id="playSeg">
-    <button data-sub="backing" class="on">Backing tracks</button>
-    <button data-sub="audio">My audio file</button>
+    <button data-sub="backing" class="on">Player</button>
+    <button data-sub="songs">Songs</button>
+    <button data-sub="audio">My audio</button>
+  </div>
+
+  <div id="play-songs" hidden>
+    <div class="card">
+      <p class="hint">Traditional and public-domain songs with full chord charts. Tap <b>Play along</b> to load one into the player, then mute the guitar in the mix and play it yourself. For songs that are still in copyright, type the chords in with <b>Edit / new</b> on the player, or play along with your own recording under <b>My audio</b>.</p>
+      <div id="songList"></div>
+    </div>
   </div>
 
   <div id="play-backing">
@@ -55,6 +82,7 @@
         <button class="btn" id="songEdit">Edit / new</button>
       </div>
       <div class="meta small muted" id="songMeta"></div>
+      <div class="small tip" id="songTip"></div>
 
       <div class="now">
         <div class="nowbox">
@@ -274,13 +302,15 @@
 </dialog>
 
 <nav class="tabbar">
+  <button data-tab="home"><i>⌂</i>Home</button>
   <button data-tab="tune"><i>♪</i>Tune</button>
   <button data-tab="play"><i>▶</i>Play</button>
-  <button data-tab="learn"><i>♬</i>Learn</button>
+  <button data-tab="learn"><i>♬</i>Lessons</button>
   <button data-tab="practice"><i>◷</i>Practice</button>
 </nav>
 
 <script src="core.js"></script>
+<script src="songs.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
