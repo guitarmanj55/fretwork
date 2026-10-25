@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14110f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fretwork">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+<title>Fretwork</title>
+</head>
+<body>
+<header class="top"><span class="logo">Fretwork</span><span class="sub" id="topSub"></span></header>
+
+<main>
+<!-- ================= TUNE ================= -->
+<section id="tab-tune" class="tab">
+  <div class="card tuner">
+    <div class="row between">
+      <select id="tuningSel" aria-label="Tuning"></select>
+      <label class="small">A4 <select id="a4Sel" aria-label="Reference pitch"></select></label>
+    </div>
+    <div class="note-big"><span id="tNote">–</span><span id="tOct"></span></div>
+    <div class="hz" id="tHz">&nbsp;</div>
+    <div class="meter" aria-hidden="true">
+      <div class="zone"></div>
+      <div class="tick t0"></div><div class="tick t25"></div><div class="tick t50"></div><div class="tick t75"></div><div class="tick t100"></div>
+      <div class="needle" id="needle"></div>
+    </div>
+    <div class="scale-labels"><span>♭ flat</span><span>in tune</span><span>sharp ♯</span></div>
+    <div class="verdict" id="tVerdict">Pluck a string</div>
+    <div class="strings" id="strings"></div>
+    <div class="row center gap">
+      <button class="btn primary big" id="tunerBtn">Start tuner</button>
+      <button class="btn" id="autoBtn" title="Detect the string automatically">Auto string</button>
+    </div>
+    <p class="hint" id="tHint">Tap a string to hear its pitch and lock the tuner to it. Tap <b>Auto string</b> to let the app work out which string you are plucking. Needs microphone access.</p>
+  </div>
+</section>
+
+<!-- ================= PLAY ================= -->
+<section id="tab-play" class="tab">
+  <div class="seg" id="playSeg">
+    <button data-sub="backing" class="on">Backing tracks</button>
+    <button data-sub="audio">My audio file</button>
+  </div>
+
+  <div id="play-backing">
+    <div class="card">
+      <div class="row gap">
+        <select id="songSel" aria-label="Song" class="grow"></select>
+        <button class="btn" id="songEdit">Edit / new</button>
+      </div>
+      <div class="meta small muted" id="songMeta"></div>
+
+      <div class="now">
+        <div class="nowbox">
+          <div class="label">NOW <span id="countIn" class="count"></span></div>
+          <div class="chordname" id="nowName">–</div>
+          <div id="nowDiag" class="diag big"></div>
+          <div class="small muted" id="nowCapo"></div>
+        </div>
+        <div class="nextbox">
+          <div class="label">NEXT</div>
+          <div class="chordname sm" id="nextName">–</div>
+          <div id="nextDiag" class="diag"></div>
+        </div>
+      </div>
+      <div class="dots" id="beatDots"></div>
+
+      <div class="row center gap">
+        <button class="btn primary big" id="playBtn">▶ Play</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">CHART <span class="muted small">(tap a bar to jump)</span></div>
+      <div class="chart" id="chart"></div>
+      <div class="row gap wrap mt">
+        <label class="chk"><input type="checkbox" id="loopOn"> Loop bars</label>
+        <label class="small">from <input type="number" id="loopFrom" min="1" value="1" class="num"></label>
+        <label class="small">to <input type="number" id="loopTo" min="1" value="1" class="num"></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">TEMPO</div>
+      <div class="row gap">
+        <button class="btn sq" id="bpmMinus">−</button>
+        <input type="range" id="bpmRange" min="40" max="200" class="grow">
+        <button class="btn sq" id="bpmPlus">+</button>
+        <span class="bpm" id="bpmVal">100</span>
+      </div>
+      <div class="row gap wrap mt" id="bpmChips"></div>
+      <div class="row gap wrap mt">
+        <label class="small grow">Feel <select id="feelSel"></select></label>
+        <label class="small">Capo <select id="capoSel"></select></label>
+        <label class="small">Key <select id="transSel"></select></label>
+      </div>
+      <div class="row gap wrap mt">
+        <label class="chk"><input type="checkbox" id="countInChk"> Count-in</label>
+        <label class="chk"><input type="checkbox" id="loopSongChk" checked> Repeat song</label>
+      </div>
+    </div>
+
+    <details class="card">
+      <summary>Mix: mute the guitar so <i>you</i> play it</summary>
+      <div id="mix"></div>
+    </details>
+  </div>
+
+  <div id="play-audio" hidden>
+    <div class="card">
+      <p class="hint">Play along with your own recordings (MP3, M4A, WAV…). Files stay on your device. Slow tricky parts down without changing the pitch, and loop a section between A and B.</p>
+      <label class="btn primary filebtn">Choose audio file<input type="file" id="afFile" accept="audio/*" hidden></label>
+      <div class="small muted mt" id="afName">No file loaded</div>
+      <input type="range" id="afSeek" min="0" max="1000" value="0" class="full mt" disabled>
+      <div class="row between small muted"><span id="afCur">0:00</span><span id="afDur">0:00</span></div>
+      <div class="row center gap mt">
+        <button class="btn sq" id="afBack">−10s</button>
+        <button class="btn primary big" id="afPlay" disabled>▶ Play</button>
+        <button class="btn sq" id="afFwd">+10s</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">LOOP</div>
+      <div class="row gap wrap">
+        <button class="btn" id="afA">Set A</button>
+        <button class="btn" id="afB">Set B</button>
+        <button class="btn" id="afClear">Clear</button>
+        <span class="small muted" id="afLoopTxt">no loop</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">SPEED <span id="afSpeedVal" class="muted">100%</span></div>
+      <input type="range" id="afSpeed" min="40" max="125" step="5" value="100" class="full">
+      <div class="row gap wrap mt" id="afSpeedChips"></div>
+      <div class="label mt">FINE TUNE TO YOUR GUITAR <span id="afPitchVal" class="muted">0¢</span></div>
+      <input type="range" id="afPitch" min="-100" max="100" step="5" value="0" class="full">
+      <p class="hint">If the recording sits slightly sharp or flat against your tuned guitar, nudge it here. While this is off-centre, speed is fixed at 100% (the two share one control in the browser).</p>
+      <div class="label mt">VOLUME</div>
+      <input type="range" id="afVol" min="0" max="100" value="90" class="full">
+    </div>
+  </div>
+</section>
+
+<!-- ================= LEARN ================= -->
+<section id="tab-learn" class="tab">
+  <div class="seg" id="learnSeg">
+    <button data-sub="chords" class="on">Chords</button>
+    <button data-sub="scales">Scales</button>
+    <button data-sub="strum">Strumming</button>
+    <button data-sub="skills">Skills</button>
+  </div>
+
+  <div id="learn-chords">
+    <div class="card">
+      <div class="seg small" id="chordGroups"></div>
+      <div class="chordgrid" id="chordGrid"></div>
+    </div>
+    <div class="card">
+      <div class="label">LOOK UP ANY CHORD</div>
+      <div class="row gap"><input type="text" id="chordQ" class="grow" placeholder="e.g. Ebm7, F#, C/G, Bsus4" autocapitalize="none" autocomplete="off"><button class="btn" id="chordQBtn">Show</button></div>
+      <div id="chordQOut" class="mt"></div>
+    </div>
+  </div>
+
+  <div id="learn-scales" hidden>
+    <div class="card">
+      <div class="row gap wrap">
+        <label class="small">Key <select id="scRoot"></select></label>
+        <label class="small grow">Scale <select id="scType"></select></label>
+      </div>
+      <div class="row gap wrap mt" id="scPos"></div>
+      <div class="fretwrap"><div id="fretboard"></div></div>
+      <div class="row gap wrap mt">
+        <label class="chk"><input type="checkbox" id="scDeg"> Show degrees</label>
+        <label class="small">BPM <input type="number" id="scBpm" class="num" value="90" min="40" max="200"></label>
+        <button class="btn primary" id="scPlay">▶ Play shape</button>
+      </div>
+      <div class="small muted mt" id="scNotes"></div>
+    </div>
+  </div>
+
+  <div id="learn-strum" hidden>
+    <div class="card" id="strumList"></div>
+  </div>
+
+  <div id="learn-skills" hidden>
+    <div class="card">
+      <p class="hint">Typical grade-5 targets. Syllabi differ between boards, so treat this as a practice checklist rather than an exam list. Ticks are saved on this device.</p>
+      <div id="skillList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRACTICE ================= -->
+<section id="tab-practice" class="tab">
+  <div class="card">
+    <div class="label">METRONOME</div>
+    <div class="dots" id="mDots"></div>
+    <div class="row gap">
+      <button class="btn sq" id="mMinus">−</button>
+      <input type="range" id="mRange" min="30" max="240" class="grow">
+      <button class="btn sq" id="mPlus">+</button>
+      <span class="bpm" id="mVal">80</span>
+    </div>
+    <div class="row gap wrap mt">
+      <label class="small">Time <select id="mTs"><option>4/4</option><option>3/4</option></select></label>
+      <label class="chk"><input type="checkbox" id="mSub"> 8th clicks</label>
+      <button class="btn" id="mTap">Tap tempo</button>
+      <button class="btn primary grow" id="mPlay">▶ Start</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">CHORD CHANGE TRAINER</div>
+    <div class="chips" id="trChips"></div>
+    <div class="row gap mt">
+      <input type="text" id="trAdd" placeholder="add chord" class="grow" autocapitalize="none" autocomplete="off">
+      <button class="btn" id="trAddBtn">Add</button>
+    </div>
+    <div class="row gap wrap mt">
+      <label class="small">Bars per chord <select id="trBars"><option>1</option><option>2</option><option>4</option></select></label>
+      <label class="small">BPM <input type="number" id="trBpm" class="num" value="60" min="30" max="200"></label>
+      <button class="btn primary grow" id="trPlay">▶ Start</button>
+    </div>
+    <div class="now mt">
+      <div class="nowbox"><div class="label">NOW</div><div class="chordname sm" id="trNowName">–</div><div id="trNowDiag" class="diag"></div></div>
+      <div class="nextbox"><div class="label">NEXT</div><div class="chordname sm" id="trNextName">–</div><div id="trNextDiag" class="diag"></div></div>
+    </div>
+    <div class="dots" id="trDots"></div>
+    <hr>
+    <div class="label">60-SECOND CHALLENGE <span class="muted small">(first two chips)</span></div>
+    <div class="row gap">
+      <button class="btn primary" id="chStart">Start</button>
+      <button class="btn big grow" id="chTap" disabled>Clean change ✓</button>
+      <span class="bpm" id="chCount">0</span>
+    </div>
+    <div class="small muted mt" id="chInfo">Switch between the two chords as many times as you can with a clean, ringing sound. Tap after each change.</div>
+  </div>
+
+  <div class="card">
+    <div class="label">PRACTICE LOG <span class="muted small">(counts time while something is playing)</span></div>
+    <div class="row between"><span id="logToday" class="bpm">0 min</span><label class="small">Goal <input type="number" id="logGoal" class="num" min="5" max="240" step="5"> min</label></div>
+    <div class="progress"><div id="logBar"></div></div>
+    <div class="week" id="logWeek"></div>
+    <div class="small muted" id="logStreak"></div>
+  </div>
+</section>
+</main>
+
+<dialog id="songDlg">
+  <form method="dialog" id="songForm" class="dlg">
+    <h3 id="dlgTitle">Song</h3>
+    <label class="small">Name<input type="text" id="dName" required maxlength="60"></label>
+    <div class="row gap">
+      <label class="small grow">BPM<input type="number" id="dBpm" min="40" max="200" value="90"></label>
+      <label class="small grow">Time<select id="dTs"><option>4/4</option><option>3/4</option></select></label>
+      <label class="small grow">Feel<select id="dFeel"></select></label>
+    </div>
+    <label class="small">Chords, one bar per section. Put two chords in a bar to split it, and use <code>|</code> or new lines between bars. <code>%</code> repeats the last bar, <code>N.C</code> is a rest.
+      <textarea id="dChart" rows="6" spellcheck="false" placeholder="| Am | C G | F | E |"></textarea>
+    </label>
+    <div class="err" id="dErr"></div>
+    <div class="row gap between">
+      <button type="button" class="btn danger" id="dDelete">Delete</button>
+      <span class="row gap"><button type="button" class="btn" id="dCancel">Cancel</button><button type="submit" class="btn primary" id="dSave">Save</button></span>
+    </div>
+  </form>
+</dialog>
+
+<nav class="tabbar">
+  <button data-tab="tune"><i>♪</i>Tune</button>
+  <button data-tab="play"><i>▶</i>Play</button>
+  <button data-tab="learn"><i>♬</i>Learn</button>
+  <button data-tab="practice"><i>◷</i>Practice</button>
+</nav>
+
+<script src="core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
