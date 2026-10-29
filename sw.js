@@ -1,5 +1,5 @@
 // Cache-first service worker so the app opens offline once it has been loaded.
-const CACHE = 'fretwork-v5';
+const CACHE = 'fretwork-v6';
 const FILES = ['./', 'index.html', 'style.css', 'core.js', 'app.js', 'songs.js', 'manifest.webmanifest', 'icon.svg'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => {

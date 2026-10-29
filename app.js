@@ -338,9 +338,13 @@ async function tunerStart() {
       : 'Allow microphone access for this site in your browser settings, then try again.';
     return;
   }
+  try { await ctx.resume(); } catch (e) { /* ignore */ }
   T.src = ctx.createMediaStreamSource(T.stream);
   T.analyser = ctx.createAnalyser(); T.analyser.fftSize = 4096; T.analyser.smoothingTimeConstant = 0;
   T.src.connect(T.analyser);
+  // some browsers only pull audio through a graph that reaches the destination, so end it in a silent sink
+  T.sink = ctx.createGain(); T.sink.gain.value = 0;
+  T.analyser.connect(T.sink); T.sink.connect(ctx.destination);
   T.buf = new Float32Array(T.analyser.fftSize);
   T.running = true; T.hist = []; T.last = 0;
   $('tunerBtn').textContent = 'Stop tuner';
@@ -350,8 +354,8 @@ async function tunerStart() {
 function tunerStop() {
   T.running = false; cancelAnimationFrame(T.raf);
   if (T.stream) T.stream.getTracks().forEach((t) => t.stop());
-  try { if (T.src) T.src.disconnect(); } catch (e) { /* ignore */ }
-  T.stream = null; T.src = null; T.analyser = null;
+  try { if (T.src) T.src.disconnect(); if (T.sink) T.sink.disconnect(); } catch (e) { /* ignore */ }
+  T.sink = null; T.stream = null; T.src = null; T.analyser = null;
   audioSession('playback');
   const b = $('tunerBtn'); if (b) b.textContent = 'Start tuner';
   tunerIdle();
@@ -368,7 +372,7 @@ function tunerLoop(ts) {
   if (ts - T.last < 40) return;
   T.last = ts;
   T.analyser.getFloatTimeDomainData(T.buf);
-  const r = C.detectPitch(T.buf, ctx.sampleRate);
+  const r = C.detectPitch(T.buf, ctx.sampleRate, { minRms: 0.002 });
   const now = performance.now();
   if (r.freq > 0 && r.clarity > 0.7) {
     T.lastSig = now;
@@ -391,6 +395,9 @@ function tunerLoop(ts) {
     } else T.inSince = 0;
   } else if (now - T.lastSig > 600) {
     T.hist = []; T.inSince = 0; tunerIdle();
+    let rms = 0; for (let i = 0; i < T.buf.length; i++) rms += T.buf[i] * T.buf[i];
+    rms = Math.sqrt(rms / T.buf.length);
+    $('tHz').textContent = 'Mic level ' + '▮'.repeat(Math.min(12, Math.round(rms * 400))) + (ctx.state !== 'running' ? ' (audio ' + ctx.state + ')' : '');
   }
 }
 
