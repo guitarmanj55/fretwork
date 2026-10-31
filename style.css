@@ -8,7 +8,7 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom));min-height:100vh;mi
 main{max-width:760px;margin:0 auto;padding:0 12px}
 .tab{display:none}.tab.active{display:block}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin:10px 0}
-details.card summary{cursor:pointer;font-weight:600}
+details.card summary{cursor:pointer;font-weight:600;padding:11px 0}
 .label{font-size:12px;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:6px}
 .small{font-size:13px}.muted{color:var(--muted)}.mt{margin-top:10px}.full{width:100%}.grow{flex:1;min-width:0}
 .row{display:flex;align-items:center}.between{justify-content:space-between}.center{justify-content:center}.gap{gap:10px}.wrap{flex-wrap:wrap}
@@ -17,7 +17,7 @@ hr{border:0;border-top:1px solid var(--line);margin:14px 0}
 .chk{display:flex;align-items:center;gap:6px;font-size:14px}
 input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
 input[type=range]{accent-color:var(--accent);height:32px}
-select,input[type=text],input[type=number],textarea{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;min-height:42px}
+select,input[type=text],input[type=number],textarea{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:16px;min-height:44px} /* 16px: iOS zooms on focus below that, and font:inherit would pull in a smaller label size */
 textarea{width:100%;font-family:ui-monospace,Menlo,monospace;margin-top:6px}
 .num{width:70px}
 label.small{display:flex;flex-direction:column;gap:4px;color:var(--muted)}
@@ -36,11 +36,11 @@ dialog label.small{margin-top:10px}
 .btn.on{outline:2px solid var(--accent)}
 .filebtn{display:inline-flex;align-items:center}
 .seg{display:flex;gap:6px;background:var(--panel);padding:5px;border-radius:14px;border:1px solid var(--line);margin:10px 0;overflow-x:auto}
-.seg button{flex:1;background:none;border:0;color:var(--muted);padding:10px 12px;border-radius:10px;font:inherit;font-weight:600;white-space:nowrap}
+.seg button{flex:1;min-height:44px;background:none;border:0;color:var(--muted);padding:10px 12px;border-radius:10px;font:inherit;font-weight:600;white-space:nowrap}
 .seg button.on{background:var(--accent);color:var(--accent-ink)}
-.seg.small button{padding:7px 10px;font-size:14px}
+.seg.small button{padding:7px 10px;font-size:14px;min-height:44px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;min-height:40px}
+.chip{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;min-height:44px;min-width:44px}
 .chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 
 /* home */
