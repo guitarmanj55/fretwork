@@ -942,6 +942,8 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   const hadSW = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadSW && !isActive() && !T.running) location.reload(); });
   navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is optional */ });
+  document.addEventListener('gesturestart', (e) => e.preventDefault()); // no pinch-zoom
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); // ask iOS not to evict saved data
 }
 window.__fretwork = { C, playSeq, S }; // handy for debugging in the console
 })();
